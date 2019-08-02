@@ -3,13 +3,17 @@ import { check, assignWithSymbols, createSetContextWarning } from './utils'
 import { stdChannel } from './channel'
 import { runSaga } from './runSaga'
 
-export default function sagaMiddlewareFactory({ context = {}, channel = stdChannel(), sagaMonitor, ...options } = {}) {
+export default function sagaMiddlewareFactory({ context = {}, channel = stdChannel(), sagaMonitor, putAction, ...options } = {}) {
   let boundRunSaga
 
   if (process.env.NODE_ENV !== 'production') {
     check(channel, is.channel, 'options.channel passed to the Saga middleware is not a channel')
   }
 
+  function putAction(channel, action) {
+    channel.put(action) 
+  }
+  
   function sagaMiddleware({ getState, dispatch }) {
     boundRunSaga = runSaga.bind(null, {
       ...options,
@@ -25,7 +29,7 @@ export default function sagaMiddlewareFactory({ context = {}, channel = stdChann
         sagaMonitor.actionDispatched(action)
       }
       const result = next(action) // hit reducers
-      channel.put(action)
+      putAction(channel, action)
       return result
     }
   }
