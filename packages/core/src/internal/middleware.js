@@ -3,7 +3,12 @@ import { check, assignWithSymbols, createSetContextWarning } from './utils'
 import { stdChannel } from './channel'
 import { runSaga } from './runSaga'
 
-export default function sagaMiddlewareFactory({ context = {}, channel = stdChannel(), sagaMonitor, ...options } = {}) {
+
+function defaultPutAction(channel, action) {
+  channel.put(action) 
+}
+
+export default function sagaMiddlewareFactory({ context = {}, channel = stdChannel(), sagaMonitor, putAction = defaultPutAction, ...options } = {}) {
   let boundRunSaga
 
   if (process.env.NODE_ENV !== 'production') {
@@ -25,7 +30,7 @@ export default function sagaMiddlewareFactory({ context = {}, channel = stdChann
         sagaMonitor.actionDispatched(action)
       }
       const result = next(action) // hit reducers
-      channel.put(action)
+      putAction(channel, action)
       return result
     }
   }
