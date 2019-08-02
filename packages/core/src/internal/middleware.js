@@ -3,16 +3,18 @@ import { check, assignWithSymbols, createSetContextWarning } from './utils'
 import { stdChannel } from './channel'
 import { runSaga } from './runSaga'
 
-export default function sagaMiddlewareFactory({ context = {}, channel = stdChannel(), sagaMonitor, putAction, ...options } = {}) {
+
+function defaultPutAction(channel, action) {
+  channel.put(action) 
+}
+
+export default function sagaMiddlewareFactory({ context = {}, channel = stdChannel(), sagaMonitor, putAction = defaultPutAction, ...options } = {}) {
   let boundRunSaga
 
   if (process.env.NODE_ENV !== 'production') {
     check(channel, is.channel, 'options.channel passed to the Saga middleware is not a channel')
   }
 
-  function putAction(channel, action) {
-    channel.put(action) 
-  }
   
   function sagaMiddleware({ getState, dispatch }) {
     boundRunSaga = runSaga.bind(null, {
