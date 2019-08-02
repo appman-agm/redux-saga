@@ -14,7 +14,7 @@ export default function sagaMiddlewareFactory({ context = {}, channel = stdChann
   if (process.env.NODE_ENV !== 'production') {
     check(channel, is.channel, 'options.channel passed to the Saga middleware is not a channel')
   }
-  
+
   function sagaMiddleware({ getState, dispatch }) {
     boundRunSaga = runSaga.bind(null, {
       ...options,
